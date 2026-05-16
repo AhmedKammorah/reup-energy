@@ -2,7 +2,6 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { buildConfig } from 'payload'
-import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { gcsStorage } from '@payloadcms/storage-gcs'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -36,7 +35,8 @@ export default buildConfig({
     ? postgresAdapter({
         pool: { connectionString: process.env.DATABASE_URI! },
       })
-    : sqliteAdapter({
+    : // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require('@payloadcms/db-sqlite').sqliteAdapter({
         client: { url: process.env.DATABASE_URI || 'file:./reup-landing.db' },
         push: true,
       }),
