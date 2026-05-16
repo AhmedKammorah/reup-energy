@@ -17,7 +17,10 @@ const dirname = path.dirname(filename)
 
 const isProd = process.env.NODE_ENV === 'production'
 
+const serverURL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
 export default buildConfig({
+  serverURL,
   admin: {
     user: Users.slug,
     meta: {
@@ -50,6 +53,6 @@ export default buildConfig({
       ]
     : [],
   sharp,
-  cors: [process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'],
-  csrf: [process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'],
+  cors: [serverURL],
+  csrf: [serverURL],
 })
