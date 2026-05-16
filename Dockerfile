@@ -11,6 +11,7 @@ RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN pnpm payload generate:importmap
 RUN pnpm build
 
 FROM node:20-alpine AS runner
