@@ -423,3 +423,6 @@ Tracks 1 and 2 can run in parallel — code changes don't need infra to exist ye
 | Date | Track | Note |
 | :--- | :--- | :--- |
 | 2026-05-16 | — | Plan drafted, repo initialized + pushed to GitHub |
+| 2026-05-16 | 2 | GCP infra provisioned: `reup-energy-prod` project, Cloud SQL `cognalabs-pg-eu` (Postgres 15, shared), Artifact Registry, GCS `reup-energy-media`, runtime + deployer SAs, WIF for GitHub Actions, secrets in Secret Manager |
+| 2026-05-16 | 1 | Repo scaffold: Dockerfile, `.dockerignore`, Next standalone, Payload Postgres + GCS adapters wired, GH Actions deploy workflow |
+| 2026-05-16 | 4 | Cloudflare zone `reup.energy` added; nameservers updated at GoDaddy, propagation pending |
