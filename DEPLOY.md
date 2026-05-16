@@ -426,3 +426,6 @@ Tracks 1 and 2 can run in parallel — code changes don't need infra to exist ye
 | 2026-05-16 | 2 | GCP infra provisioned: `reup-energy-prod` project, Cloud SQL `cognalabs-pg-eu` (Postgres 15, shared), Artifact Registry, GCS `reup-energy-media`, runtime + deployer SAs, WIF for GitHub Actions, secrets in Secret Manager |
 | 2026-05-16 | 1 | Repo scaffold: Dockerfile, `.dockerignore`, Next standalone, Payload Postgres + GCS adapters wired, GH Actions deploy workflow |
 | 2026-05-16 | 4 | Cloudflare zone `reup.energy` added; nameservers updated at GoDaddy, propagation pending |
+| 2026-05-16 | 3 | First successful Cloud Run deploy via GH Actions; org policy `iam.allowedPolicyMemberDomains` overridden to allow `allUsers` invoker |
+| 2026-05-16 | 1 | Initial Postgres migration generated + applied; `/` + `/admin` return 200 on Cloud Run direct URL |
+| 2026-05-16 | 4 | `reup.energy` ownership verified at Google Webmaster; Cloud Run domain mappings created for apex + `www`; A/AAAA/CNAME records added in Cloudflare via API; stale GoDaddy parking records cleaned. TLS cert provisioning by Google (15min–24h). |
