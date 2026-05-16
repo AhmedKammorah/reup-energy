@@ -14,7 +14,7 @@ import { Contact } from '@/components/Contact'
 import { Footer } from '@/components/Footer'
 import { Backdrop } from '@/components/Backdrop'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 export default async function LandingPage() {
   const payload = await getPayload({ config: configPromise })

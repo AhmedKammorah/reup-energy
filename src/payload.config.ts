@@ -3,6 +3,8 @@ import { fileURLToPath } from 'url'
 
 import { buildConfig } from 'payload'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import { gcsStorage } from '@payloadcms/storage-gcs'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import sharp from 'sharp'
 
@@ -13,6 +15,8 @@ import { LandingPage } from './globals/LandingPage'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const isProd = process.env.NODE_ENV === 'production'
 
 export default buildConfig({
   admin: {
@@ -28,14 +32,23 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: sqliteAdapter({
-    client: {
-      url: process.env.DATABASE_URI || 'file:./reup-landing.db',
-    },
-    // Dev-mode: auto-push schema changes without writing migrations.
-    // For prod, set NODE_ENV=production and use `payload migrate` against Postgres.
-    push: process.env.NODE_ENV !== 'production',
-  }),
+  db: isProd
+    ? postgresAdapter({
+        pool: { connectionString: process.env.DATABASE_URI! },
+      })
+    : sqliteAdapter({
+        client: { url: process.env.DATABASE_URI || 'file:./reup-landing.db' },
+        push: true,
+      }),
+  plugins: isProd && process.env.GCS_BUCKET
+    ? [
+        gcsStorage({
+          collections: { media: true },
+          bucket: process.env.GCS_BUCKET,
+          options: {},
+        }),
+      ]
+    : [],
   sharp,
   cors: [process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'],
   csrf: [process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'],

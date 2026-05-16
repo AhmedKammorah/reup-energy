@@ -1,4 +1,4 @@
-import type { SVGProps } from 'react'
+import type { SVGProps, ReactElement } from 'react'
 
 type IconProps = SVGProps<SVGSVGElement> & { size?: number }
 
@@ -171,7 +171,7 @@ export const Icon = ({
 }) => {
   if (!name) return null
   const key = name.trim().toLowerCase()
-  const Cmp = (ICON_MAP as Record<string, (props: IconProps) => JSX.Element>)[key]
+  const Cmp = (ICON_MAP as Record<string, (props: IconProps) => ReactElement>)[key]
   if (!Cmp) {
     // Backward compat: render literal (emoji / text) if the CMS still holds an emoji
     return <span className={className}>{name}</span>

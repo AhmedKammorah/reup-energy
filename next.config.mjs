@@ -2,12 +2,15 @@ import { withPayload } from '@payloadcms/next/withPayload'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   reactStrictMode: true,
   experimental: {
     reactCompiler: false,
   },
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'storage.googleapis.com' },
+    ],
   },
 }
 
