@@ -43,11 +43,11 @@ export default buildConfig({
         client: { url: process.env.DATABASE_URI || 'file:./reup-landing.db' },
         push: true,
       }),
-  plugins: isProd && process.env.GCS_BUCKET
+  plugins: isProd
     ? [
         gcsStorage({
           collections: { media: true },
-          bucket: process.env.GCS_BUCKET,
+          bucket: process.env.GCS_BUCKET || 'reup-energy-media',
           options: {},
         }),
       ]
