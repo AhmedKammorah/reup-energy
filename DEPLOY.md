@@ -429,3 +429,19 @@ Tracks 1 and 2 can run in parallel — code changes don't need infra to exist ye
 | 2026-05-16 | 3 | First successful Cloud Run deploy via GH Actions; org policy `iam.allowedPolicyMemberDomains` overridden to allow `allUsers` invoker |
 | 2026-05-16 | 1 | Initial Postgres migration generated + applied; `/` + `/admin` return 200 on Cloud Run direct URL |
 | 2026-05-16 | 4 | `reup.energy` ownership verified at Google Webmaster; Cloud Run domain mappings created for apex + `www`; A/AAAA/CNAME records added in Cloudflare via API; stale GoDaddy parking records cleaned. TLS cert provisioning by Google (15min–24h). |
+| 2026-05-17 | 3 | Managed TLS provisioned at https://reup.energy. Several follow-up fixes: dropped Next standalone, upgraded base to `node:22-alpine`, fixed Payload `serverURL`, regenerated importMap. **Root cause of "blank admin" bug:** `gcsStorage` plugin was gated on a runtime env var (`GCS_BUCKET`) but `payload generate:importmap` runs at *build* time → plugin's client component (`GcsClientUploadHandler`) missing from importMap → Payload's RSC stream emitted incomplete payload → React couldn't hydrate → blank page with no console errors (error was logged as `INFO` in Cloud Run, not `WARNING`/`ERROR`). Fix: always include plugins in the prod config; gate only the *values* on env vars, never the *plugin's presence*. |
+
+---
+
+## Gotchas (sorted by hours-lost)
+
+| # | Trap | Fix |
+| :--- | :--- | :--- |
+| 1 | **Payload plugins gated on runtime env vars are invisible to importMap generation** — admin renders blank with no console errors because `__next_f.push` stream is missing component refs. Error appears as `INFO` log in Cloud Run, not `WARNING`. | Always load admin-affecting plugins unconditionally at build time. Gate only the values (bucket name, secrets) on env vars, with a sensible default for build. Grep build logs for `getFromImportMap: PayloadComponent not found` to catch this. |
+| 2 | **Cloud SQL Auth Proxy fails with `auth: "invalid_grant" "reauth related error (invalid_rapt)"`** after ~1h idle | Re-run `gcloud auth application-default login --account=ahmed@cognalabs.com` (note: `application-default`, NOT plain `gcloud auth login` — different credentials file). |
+| 3 | **CognaLabs GCP org policy `iam.allowedPolicyMemberDomains` blocks `allUsers` invoker on Cloud Run** → public URL returns 403 even with `--allow-unauthenticated` | Override policy at project level: `gcloud resource-manager org-policies set-policy /tmp/allow_all.yaml --project=<id>` with `listPolicy.allValues: ALLOW`. Then re-run the invoker binding. |
+| 4 | **GCP billing account caps at 5 billing-enabled projects** for new orgs (CognaLabs has 5 active, capping us out) | Unlink billing from a dormant Firebase-shadow project (e.g. `veriscrape-gx4xm`) to free a slot, OR file quota-increase request. |
+| 5 | **Migration files generated locally against SQLite won't run on Postgres** (`db.run is not a function`) | Delete `src/migrations/*` and regenerate via `pnpm payload migrate:create` while connected to the prod Postgres through the Auth Proxy. |
+| 6 | **Next.js `output: 'standalone'` + Payload 3 admin** delivers an admin chunk of only ~2KB and breaks RSC hydration | Drop `output: 'standalone'`. Copy full `node_modules` + `.next` in the Docker runner stage. Invoke `node node_modules/next/dist/bin/next start` directly (no `pnpm` in runtime — `pnpm@latest` itself needs Node 22). |
+| 7 | **Fine-grained PATs lack Actions+Secrets scopes** even with `repo` permission. `gh auth refresh` doesn't help — PATs are managed in the web UI only. | Use OAuth login: `GITHUB_TOKEN='' gh auth login --hostname github.com --git-protocol ssh --web -s repo,workflow` and choose "Login with a web browser" (NOT paste a token). |
+| 8 | **`output: 'standalone'` Docker stage drops `public/` reference** if the project has no public dir | Either create an empty `public/` dir or remove the `COPY ... /app/public` line from the Dockerfile. |
